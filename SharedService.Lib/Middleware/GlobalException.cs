@@ -29,6 +29,7 @@ namespace SharedService.Lib.Middleware
                     statusCode = context.Response.StatusCode;
                     await ModifyHeader(context, title, msg, statusCode);
                 }
+                await next(context);
             }
             catch (Exception ex) {
                 if (ex is TaskCanceledException || ex is TimeoutException)

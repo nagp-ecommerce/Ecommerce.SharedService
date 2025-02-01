@@ -31,9 +31,11 @@ namespace SharedService.Lib.DI
             });
 
             // Adding Generic DbContext from microservice
-            services.AddDbContext<TContext>(option => option.UseNpgsql(
-                config.GetConnectionString("defaultConnection")
-                ));
+            services.AddDbContext<TContext>(option => 
+                option.UseNpgsql(config.GetConnectionString("defaultConnection"))
+                    .LogTo(Console.WriteLine, LogLevel.Information)
+                        .EnableSensitiveDataLogging()
+                );
             return services;
         }
 
