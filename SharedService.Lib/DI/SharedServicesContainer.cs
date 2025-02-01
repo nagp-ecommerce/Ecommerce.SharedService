@@ -36,6 +36,15 @@ namespace SharedService.Lib.DI
                     .LogTo(Console.WriteLine, LogLevel.Information)
                         .EnableSensitiveDataLogging()
                 );
+
+            // Adding logging
+            services.AddLogging(options =>
+            {
+                options.ClearProviders();
+                options.AddConsole();
+                options.SetMinimumLevel(LogLevel.Debug);
+            });
+
             return services;
         }
 
