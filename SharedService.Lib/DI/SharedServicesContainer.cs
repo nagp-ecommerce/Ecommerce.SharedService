@@ -54,7 +54,8 @@ namespace SharedService.Lib.DI
             app.UseMiddleware<GlobalException>();
 
             // block all outsider calls
-            //app.UseMiddleware<RedirectToApiGateway>();
+            // All apis will be localhost:5000/api/products/
+            app.UseMiddleware<RedirectToApiGateway>();
 
             return app;
         }
