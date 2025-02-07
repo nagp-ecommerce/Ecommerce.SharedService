@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Security.Claims;
+using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,7 +34,8 @@ namespace SharedService.Lib.DI
                         ValidIssuer = issuer,
                         ValidateAudience = true,
                         ValidAudience = audience,
-                        ValidateLifetime=true
+                        ValidateLifetime=true,
+                        RoleClaimType=ClaimTypes.Role,
                     };
                 });
             return services;

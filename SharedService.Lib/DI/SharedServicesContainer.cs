@@ -24,7 +24,8 @@ namespace SharedService.Lib.DI
             services.AddAWSService<IAmazonSimpleNotificationService>();
             services.AddScoped<PublisherService>();
 
-            services.AddLogging(logger => {
+            services.AddLogging(logger =>
+            {
                 logger.ClearProviders();
                 logger.AddConsole();
                 logger.AddDebug();
@@ -53,7 +54,7 @@ namespace SharedService.Lib.DI
             app.UseMiddleware<GlobalException>();
 
             // block all outsider calls
-            app.UseMiddleware<RedirectToApiGateway>();
+            //app.UseMiddleware<RedirectToApiGateway>();
 
             return app;
         }
