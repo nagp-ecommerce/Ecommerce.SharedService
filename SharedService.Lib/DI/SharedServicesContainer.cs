@@ -1,4 +1,6 @@
-﻿using Amazon.SimpleNotificationService;
+﻿using Amazon;
+using Amazon.Runtime;
+using Amazon.SimpleNotificationService;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -14,15 +16,38 @@ namespace SharedService.Lib.DI
     {
         public static IServiceCollection AddSharedServices<TContext>
             (this IServiceCollection services, IConfiguration config)
-            where TContext: DbContext
+            where TContext : DbContext
         {
 
             JwtAuthenticationScheme.AddJwtAuthenticationScheme(services, config);
 
             // setting up AWS SNS asynchronous communication
-            services.AddDefaultAWSOptions(config.GetAWSOptions());
-            services.AddAWSService<IAmazonSimpleNotificationService>();
-            services.AddScoped<PublisherService>();
+            var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
+                ?? "Development";
+            if (env == "Development")
+            {
+                var key = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID", EnvironmentVariableTarget.User);
+                var secret = Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY", EnvironmentVariableTarget.User);
+                var region = Environment.GetEnvironmentVariable("AWS_REGION", EnvironmentVariableTarget.User);
+                var cred = new BasicAWSCredentials(key, secret);
+
+                if (cred is not null && region is not null)
+                {
+                    services.AddSingleton<IAmazonSimpleNotificationService>(service =>
+                        new AmazonSimpleNotificationServiceClient(
+                            cred,
+                            RegionEndpoint.GetBySystemName(region)
+                        )
+                    );
+                }
+            }
+            else
+            {
+                services.AddDefaultAWSOptions(config.GetAWSOptions("AWS"));
+                services.AddAWSService<IAmazonSimpleNotificationService>();
+            }
+
+            services.AddSingleton<IPublisherService, PublisherService>();
 
             services.AddLogging(logger =>
             {
@@ -32,7 +57,7 @@ namespace SharedService.Lib.DI
             });
 
             // Adding Generic DbContext from microservice
-            services.AddDbContext<TContext>(option => 
+            services.AddDbContext<TContext>(option =>
                 option.UseNpgsql(config.GetConnectionString("defaultConnection"))
                     .LogTo(Console.WriteLine, LogLevel.Information)
                         .EnableSensitiveDataLogging()
@@ -54,7 +79,7 @@ namespace SharedService.Lib.DI
             app.UseMiddleware<GlobalException>();
 
             // block all outsider calls
-            // All apis will be localhost:5000/api/products/
+            // All apis will be localhost:5001/api/products/
             app.UseMiddleware<RedirectToApiGateway>();
 
             return app;

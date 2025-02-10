@@ -31,14 +31,21 @@ namespace SharedService.Lib.Middleware
                 }
                 await next(context);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 if (ex is TaskCanceledException || ex is TimeoutException)
                 {
                     title = "Out of Time";
                     msg = "Reqeust Timeout. Try Again";
                     statusCode = context.Response.StatusCode;
                 }
-                await ModifyHeader(context, title, msg, statusCode);
+                Console.WriteLine(ex.Message, ex.StackTrace);
+                await ModifyHeader(
+                    context,
+                    title,
+                    ex.InnerException?.Message ?? ex.Message,
+                    statusCode
+                    );
             }
         }
 
@@ -46,11 +53,11 @@ namespace SharedService.Lib.Middleware
         {
             context.Response.ContentType = "application/json";
             await context.Response.WriteAsync(JsonSerializer.Serialize(
-                new ProblemDetails() 
-                { 
-                    Detail=msg,
-                    Title=title,
-                    Status=statusCode
+                new ProblemDetails()
+                {
+                    Detail = msg,
+                    Title = title,
+                    Status = statusCode
                 }
             ), CancellationToken.None);
         }

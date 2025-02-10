@@ -35,7 +35,8 @@ namespace SharedService.Lib.DI
                         ValidateAudience = true,
                         ValidAudience = audience,
                         ValidateLifetime=true,
-                        RoleClaimType=ClaimTypes.Role,
+                        RequireExpirationTime = true,
+                        RoleClaimType =ClaimTypes.Role,
                     };
                 });
             return services;
