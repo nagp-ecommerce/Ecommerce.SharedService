@@ -16,14 +16,15 @@ namespace SharedService.Lib.DI
                 .AddJwtBearer("Bearer", options =>
                 {
                     var key = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(config["Authentication:Key"]!)
+                        Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("AUTH_SECRET", EnvironmentVariableTarget.User)
+                            ?? config["Authentication:Key"]!)
                     );
 
                     var (issuer, audience) = (
-                        config["Authentication:Issuer"]!, 
-                        config["Authentication:Audience"]!
+                        Environment.GetEnvironmentVariable("AUTH_ISSUER", EnvironmentVariableTarget.User) ?? config["Authentication:Issuer"],
+                        Environment.GetEnvironmentVariable("AUTH_AUDIENCE", EnvironmentVariableTarget.User) ?? config["Authentication:Audience"]
                     );
-                    
+
                     options.RequireHttpsMetadata = false;
                     options.SaveToken = true;
                     options.TokenValidationParameters = new TokenValidationParameters
@@ -34,9 +35,9 @@ namespace SharedService.Lib.DI
                         ValidIssuer = issuer,
                         ValidateAudience = true,
                         ValidAudience = audience,
-                        ValidateLifetime=true,
+                        ValidateLifetime = true,
                         RequireExpirationTime = true,
-                        RoleClaimType =ClaimTypes.Role,
+                        RoleClaimType = ClaimTypes.Role,
                     };
                 });
             return services;

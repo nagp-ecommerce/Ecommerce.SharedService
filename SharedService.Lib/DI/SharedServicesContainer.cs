@@ -26,9 +26,9 @@ namespace SharedService.Lib.DI
                 ?? "Development";
             if (env == "Development")
             {
-                var key = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID", EnvironmentVariableTarget.User);
-                var secret = Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY", EnvironmentVariableTarget.User);
-                var region = Environment.GetEnvironmentVariable("AWS_REGION", EnvironmentVariableTarget.User);
+                var key = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID");
+                var secret = Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY");
+                var region = Environment.GetEnvironmentVariable("AWS_REGION");
                 var cred = new BasicAWSCredentials(key, secret);
 
                 if (cred is not null && region is not null)
@@ -57,8 +57,10 @@ namespace SharedService.Lib.DI
             });
 
             // Adding Generic DbContext from microservice
+            var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION") 
+                ?? config.GetConnectionString("defaultConnection");
             services.AddDbContext<TContext>(option =>
-                option.UseNpgsql(config.GetConnectionString("defaultConnection"))
+                option.UseNpgsql(connectionString)
                     .LogTo(Console.WriteLine, LogLevel.Information)
                         .EnableSensitiveDataLogging()
                 );
