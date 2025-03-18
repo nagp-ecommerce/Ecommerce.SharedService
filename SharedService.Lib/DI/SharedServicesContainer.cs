@@ -59,7 +59,7 @@ namespace SharedService.Lib.DI
             // Adding Generic DbContext from microservice
             var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION") 
                 ?? config.GetConnectionString("defaultConnection");
-            logger.LogInformation("Database Connection String: {connectionString}", connectionString);
+
 
             services.AddDbContext<TContext>(option =>
                 option.UseNpgsql(connectionString)
